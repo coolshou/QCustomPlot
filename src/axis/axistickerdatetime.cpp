@@ -372,7 +372,10 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate &date, Qt::TimeSpec time
   return QDateTime(date, QTime(0, 0), timeSpec).toTime_t();
 # elif QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
   return QDateTime(date, QTime(0, 0), timeSpec).toMSecsSinceEpoch()/1000.0;
+# elif QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+  return static_cast<double>(date.startOfDay(timeSpec).toMSecsSinceEpoch()) / 1000.0;
 # else
-  return date.startOfDay(timeSpec).toMSecsSinceEpoch()/1000.0;
+  QTimeZone zone = (timeSpec == Qt::UTC) ? QTimeZone::UTC : QTimeZone::systemTimeZone();
+  return static_cast<double>(date.startOfDay(zone).toMSecsSinceEpoch()) / 1000.0;
 # endif
 }
