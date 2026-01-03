@@ -895,7 +895,18 @@ void QCPColorMap::updateLegendIcon(Qt::TransformationMode transformMode, const Q
   {
     bool mirrorX = (keyAxis()->orientation() == Qt::Horizontal ? keyAxis() : valueAxis())->rangeReversed();
     bool mirrorY = (valueAxis()->orientation() == Qt::Vertical ? valueAxis() : keyAxis())->rangeReversed();
+#if QT_VERSION > QT_VERSION_CHECK(6, 8, 0)
+    Qt::Orientations orient;
+    if (mirrorY){
+      orient |= Qt::Vertical;
+    }
+    if (mirrorX){
+      orient |= Qt::Horizontal;
+    }
+    mLegendIcon = QPixmap::fromImage(mMapImage.flipped(orient)).scaled(thumbSize, Qt::KeepAspectRatio, transformMode);
+#else    
     mLegendIcon = QPixmap::fromImage(mMapImage.mirrored(mirrorX, mirrorY)).scaled(thumbSize, Qt::KeepAspectRatio, transformMode);
+#endif
   }
 }
 
@@ -1123,7 +1134,18 @@ void QCPColorMap::draw(QCPPainter *painter)
                                   coordsToPixels(mMapData->keyRange().upper, mMapData->valueRange().upper)).normalized();
     localPainter->setClipRect(tightClipRect, Qt::IntersectClip);
   }
+#if QT_VERSION > QT_VERSION_CHECK(6, 8, 0)
+  Qt::Orientations orient;
+  if (mirrorY){
+    orient |= Qt::Vertical;
+  }
+  if (mirrorX){
+    orient |= Qt::Horizontal;
+  }
+  localPainter->drawImage(imageRect, mMapImage.flipped(orient));
+#else  
   localPainter->drawImage(imageRect, mMapImage.mirrored(mirrorX, mirrorY));
+#endif  
   if (mTightBoundary)
     localPainter->setClipRegion(clipBackup);
   localPainter->setRenderHint(QPainter::SmoothPixmapTransform, smoothBackup);

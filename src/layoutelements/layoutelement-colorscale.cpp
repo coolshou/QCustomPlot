@@ -612,8 +612,18 @@ void QCPColorScaleAxisRectPrivate::draw(QCPPainter *painter)
     mirrorHorz = mParentColorScale->mColorAxis.data()->rangeReversed() && (mParentColorScale->type() == QCPAxis::atBottom || mParentColorScale->type() == QCPAxis::atTop);
     mirrorVert = mParentColorScale->mColorAxis.data()->rangeReversed() && (mParentColorScale->type() == QCPAxis::atLeft || mParentColorScale->type() == QCPAxis::atRight);
   }
-  
+#if QT_VERSION > QT_VERSION_CHECK(6, 8, 0)
+  Qt::Orientations orient;
+  if (mirrorVert){
+      orient |= Qt::Vertical;
+  }
+  if (mirrorHorz){
+      orient |= Qt::Horizontal;
+  }
+  painter->drawImage(rect().adjusted(0, -1, 0, -1), mGradientImage.flipped(orient));
+#else  
   painter->drawImage(rect().adjusted(0, -1, 0, -1), mGradientImage.mirrored(mirrorHorz, mirrorVert));
+#endif  
   QCPAxisRect::draw(painter);
 }
 

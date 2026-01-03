@@ -210,8 +210,20 @@ void QCPItemPixmap::updateScaledPixmap(QRect finalRect, bool flipHorz, bool flip
     if (mScaledPixmapInvalidated || finalRect.size() != mScaledPixmap.size()/devicePixelRatio)
     {
       mScaledPixmap = mPixmap.scaled(finalRect.size()*devicePixelRatio, mAspectRatioMode, mTransformationMode);
-      if (flipHorz || flipVert)
+      if (flipHorz || flipVert){
+#if QT_VERSION > QT_VERSION_CHECK(6, 8, 0)
+        Qt::Orientations orient;
+        if (flipVert){
+          orient |= Qt::Vertical;
+        }
+        if (flipHorz){
+          orient |= Qt::Horizontal;
+        }
+        mScaledPixmap = QPixmap::fromImage(mScaledPixmap.toImage().flipped(orient));
+#else
         mScaledPixmap = QPixmap::fromImage(mScaledPixmap.toImage().mirrored(flipHorz, flipVert));
+#endif
+      }
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
       mScaledPixmap.setDevicePixelRatio(devicePixelRatio);
 #endif
